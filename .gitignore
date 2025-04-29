@@ -1,0 +1,7 @@
+docs/draw.io/*
+application/app/node_modules/*
+application/app/dist/*
+application/app/build/*
+application/app/.idea/*
+application/app/.vscode/*
+application/app/.DS_Store
