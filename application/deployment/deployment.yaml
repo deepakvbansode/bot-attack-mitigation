@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app
+          image: app:latest # Replace with your Docker image name
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log/app
+          env:
+            - name: NODE_ENV
+              value: "production"
+        - name: fluent-bit
+          image: fluent/fluent-bit:latest
+          args:
+            - -c
+            - /fluent-bit/etc/fluent-bit.conf
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log/app
+            - name: fluent-bit-config
+              mountPath: /fluent-bit/etc
+      volumes:
+        - name: logs
+          emptyDir: {}
+        - name: fluent-bit-config
+          configMap:
+            name: fluent-bit-config
