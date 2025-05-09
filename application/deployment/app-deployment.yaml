@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: express-app
+  labels:
+    app: express-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: express-app
+  template:
+    metadata:
+      labels:
+        app: express-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+    spec:
+      containers:
+        - name: express-app
+          image: deepakbansode/bot-mitigation-app:0.3
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: express-app-service
+spec:
+  selector:
+    app: express-app
+  ports:
+    - port: 9000
+      targetPort: 3000
+  type: LoadBalancer
