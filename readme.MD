@@ -20,7 +20,7 @@ This folder contains the documentation, links etc
 ## Todos
 
 1. Create application -> done
-2. deployment it using k8s -> done
+2. deployment it using k8s -> change the image name and deploy
 3. create grafana dashboard -> done
 4. develop bot attack code -> done
 5. launch bot attack -> done

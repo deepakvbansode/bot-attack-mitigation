@@ -1,7 +1,7 @@
 docs/draw.io/*
-application/app/node_modules/*
-application/app/dist/*
-application/app/build/*
-application/app/.idea/*
-application/app/.vscode/*
-application/app/.DS_Store
+application/my-nokari-app/node_modules/*
+application/my-nokari-app/dist/*
+application/my-nokari-app/build/*
+application/my-nokari-app/.idea/*
+application/my-nokari-app/.vscode/*
+application/my-nokari-app/.DS_Store
