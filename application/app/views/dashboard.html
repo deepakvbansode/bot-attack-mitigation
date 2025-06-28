@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - GruveStore</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container mt-5">
+      <h2 class="mb-4">Product List</h2>
+      <div id="products" class="row g-3"></div>
+      <div id="checkoutMsg" class="mt-4"></div>
+      <a href="#" id="logoutBtn" class="btn btn-link mt-4">Logout</a>
+    </div>
+    <script>
+      // Check for auth cookie on page load
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+      }
+      if (!getCookie("auth")) {
+        window.location.href = "/";
+      }
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          fetch("/logout").then(() => {
+            // Remove cookie client-side for instant effect
+            document.cookie = "auth=; Max-Age=0; path=/;";
+            window.location.href = "/";
+          });
+        });
+
+      async function loadProducts() {
+        const res = await fetch("/products");
+        const products = await res.json();
+        const productsDiv = document.getElementById("products");
+        productsDiv.innerHTML = "";
+        products.forEach((product) => {
+          const col = document.createElement("div");
+          col.className = "col-md-4";
+          col.innerHTML = `
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">${product.name}</h5>
+              <p class="card-text">Price: $${product.price}</p>
+              <button class="btn btn-success w-100" onclick="checkout(${product.id}, '${product.name}')">Buy</button>
+            </div>
+          </div>
+        `;
+          productsDiv.appendChild(col);
+        });
+      }
+      async function checkout(productId, productName) {
+        const res = await fetch("/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId }),
+        });
+        const data = await res.json();
+        const msgDiv = document.getElementById("checkoutMsg");
+        if (res.ok) {
+          msgDiv.innerHTML = `<div class='alert alert-success'>${data.message}</div>`;
+        } else {
+          msgDiv.innerHTML = `<div class='alert alert-danger'>${data.message}</div>`;
+        }
+      }
+      loadProducts();
+    </script>
+  </body>
+</html>

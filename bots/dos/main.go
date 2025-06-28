@@ -9,7 +9,7 @@ import (
 
 const (
 	targetURL     = "http://localhost:9000/login"
-	requestsPerSec = 10
+	requestsPerSec = 160
 	durationSec   = 60 // Run for 60 seconds
 )
 

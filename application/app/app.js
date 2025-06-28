@@ -8,7 +8,12 @@ const collectDefaultMetrics = promClient.collectDefaultMetrics;
 const Registry = promClient.Registry;
 const register = new Registry();
 collectDefaultMetrics({ register });
-
+// Static products
+const products = [
+  { id: 1, name: "Laptop", price: 1200 },
+  { id: 2, name: "Headphones", price: 150 },
+  { id: 3, name: "Keyboard", price: 80 },
+];
 // Create custom metrics
 const httpRequestDuration = new promClient.Histogram({
   name: "http_request_duration_seconds",
@@ -98,29 +103,64 @@ app.get("/metrics", async (req, res) => {
 });
 
 // GET /login - Serve the HTML page and log the request
-app.get("/login", (req, res) => {
-  console.log("GET /login was called");
+app.get("/", (req, res) => {
   loginCounter.inc();
-  //write some cpu bound dummy code
-  for (let i = 0; i < 1e7; i++) {
-    Math.sqrt(i);
+  if (req.cookies && req.cookies.auth) {
+    return res.redirect("/dashboard");
   }
   res.status(200).sendFile(path.join(__dirname, "views", "login.html"));
 });
 
 // POST /login - Log the username and password
 app.post("/login", (req, res) => {
-  const { username, password } = req.body;
   loginCounter.inc();
-  console.log(
-    `POST /login was called with username: ${username}, password: ${password}`
+  const { email, password } = req.body;
+  const validUsers = [
+    { email: "deepak.bansode@gruve.ai", password: "gruve123" },
+    { email: "test.user@gruve.ai", password: "gruve123" },
+  ];
+  const user = validUsers.find(
+    (u) => u.email === email && u.password === password
   );
-  for (let i = 0; i < 1e7; i++) {
-    Math.sqrt(i);
+  if (!user) {
+    return res.status(401).json({ message: "Invalid email or password." });
   }
-  res.status(200).send("Login API called");
+  // Set a simple auth cookie (not secure, for demo only)
+  res.cookie("auth", email, { httpOnly: false });
+  res.json({ message: "Login successful", email });
 });
 
+app.get("/dashboard", (req, res, next) => {
+  console.log("Dashboard accessed");
+  // if (!req.cookies || !req.cookies.auth) {
+  //   console.log("cookie not found, redirecting to login");
+  //   return res.redirect("/");
+  // }
+
+  res.status(200).sendFile(path.join(__dirname, "views", "dashboard.html"));
+});
+
+// /products endpoint
+app.get("/products", (req, res) => {
+  res.json(products);
+});
+
+// /checkout endpoint
+app.post("/checkout", (req, res) => {
+  const { productId } = req.body;
+  const product = products.find((p) => p.id === productId);
+  if (!product) {
+    return res.status(404).json({ message: "Product not found." });
+  }
+  // Simulate purchase
+  res.json({ message: `Purchased ${product.name} for $${product.price}` });
+});
+
+// Logout endpoint
+app.get("/logout", (req, res) => {
+  res.clearCookie("auth");
+  res.redirect("/login.html");
+});
 // Start the server
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

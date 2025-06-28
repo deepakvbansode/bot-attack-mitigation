@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: express-app-monitor
+  labels:
+    release: prometheus
+    app: express-app
+spec:
+  selector:
+    matchLabels:
+      app: express-app
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
